@@ -1,0 +1,5 @@
+{
+  "name": "은영스쿨",
+  "description": "An AI-powered tool for analyzing CSAT English exam papers based on uploaded PDF documents. It searches for relevant passages and generates variations.",
+  "requestFramePermissions": []
+}
