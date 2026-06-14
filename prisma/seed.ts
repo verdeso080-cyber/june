@@ -28,6 +28,13 @@ async function reset() {
 }
 
 async function main() {
+  // 안전장치: 이미 데이터가 있으면 건너뜁니다. (배포 시 덮어쓰기 방지)
+  // 강제로 다시 시드하려면 SEED_FORCE=true 로 실행하세요.
+  const existing = await prisma.club.count();
+  if (existing > 0 && process.env.SEED_FORCE !== "true") {
+    console.log("기존 데이터가 있어 시드를 건너뜁니다. (SEED_FORCE=true 로 강제 가능)");
+    return;
+  }
   await reset();
 
   // 동호회
