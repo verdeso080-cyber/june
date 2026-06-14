@@ -8,3 +8,11 @@ export function formatKRW(amount: number): string {
   }
   return `${Math.round(amount).toLocaleString("ko-KR")}원`;
 }
+
+/** 날짜를 "YYYY.MM.DD" 형태로 표기합니다 (UTC 기준). */
+export function formatDate(date: Date): string {
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(date.getUTCDate()).padStart(2, "0");
+  return `${y}.${m}.${d}`;
+}
