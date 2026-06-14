@@ -1,11 +1,10 @@
 // 모임 — Prisma schema
 //
-// 개발 단계에서는 SQLite(파일 DB)를 사용합니다.
-// 운영 단계에서는 provider 를 "postgresql" 로 바꾸고
-// DATABASE_URL 만 교체하면 됩니다. (SQLite 전용 기능은 사용하지 않습니다.)
+// 개발: SQLite(파일 DB). 운영: provider 를 "postgresql" 로 바꾸고
+// DATABASE_URL 만 교체하면 됩니다. (SQLite 전용 기능은 쓰지 않습니다.)
 //
-// ⚠️ 실제 도메인 모델(회원/예산/카드/출결/활동/보고서)은
-//    2단계에서 추가합니다. 아래는 토대 검증용 최소 모델입니다.
+// 참고: SQLite 는 enum 을 지원하지 않으므로 역할/상태 등은 String 으로
+//       저장하고, 허용 값은 lib/domain.ts 의 타입/상수로 관리합니다.
 
 generator client {
   provider = "prisma-client-js"
@@ -16,10 +15,317 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// 앱 메타 정보 저장용 임시 테이블 (2단계에서 실제 모델로 대체)
-model AppMeta {
-  id        Int      @id @default(autoincrement())
-  key       String   @unique
-  value     String
+// ───────────────────────── 사용자 / 동호회 / 멤버십 ─────────────────────────
+
+model User {
+  id          String       @id @default(cuid())
+  email       String?      @unique
+  name        String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  memberships Membership[]
+}
+
+model Club {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique // 동호회 ID (예: RUNNING-2026)
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  memberships  Membership[]
+  inviteCodes  InviteCode[]
+  snapshots    MemberSnapshot[]
+  periods      BudgetPeriod[]
+  grants       BudgetGrant[]
+  cards        CorporateCard[]
+  transactions BudgetTransaction[]
+  meetings     Meeting[]
+  activities   Activity[]
+  reports      Report[]
+  auditLogs    AuditLog[]
+  slack        SlackIntegration?
+}
+
+model InviteCode {
+  id        String    @id @default(cuid())
+  clubId    String
+  code      String    @unique
+  role      String    @default("MEMBER") // OWNER | PRESIDENT | TREASURER | MEMBER
+  maxUses   Int?
+  usedCount Int       @default(0)
+  expiresAt DateTime?
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@index([clubId])
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String
+  clubId    String
+  nickname  String
+  role      String   @default("MEMBER") // OWNER | PRESIDENT | TREASURER | MEMBER
+  status    String   @default("ACTIVE") // ACTIVE | INACTIVE | REVIEW_NEEDED | LEFT
+  joinedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  club        Club         @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  attendances Attendance[]
+
+  @@unique([userId, clubId])
+  @@index([clubId])
+  @@index([status])
+}
+
+// ───────────────────────── 예산 (스냅샷 / 반기 / 지원금) ─────────────────────────
+
+/// 매월 15일 기준 활동 회원 수 스냅샷
+model MemberSnapshot {
+  id                String   @id @default(cuid())
+  clubId            String
+  snapshotDate      DateTime // 기준일(해당 월 15일)
+  year              Int
+  month             Int // 1~12
+  half              String // FIRST_HALF | SECOND_HALF
+  activeMemberCount Int
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  club  Club         @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  grant BudgetGrant?
+
+  @@unique([clubId, year, month])
+  @@index([clubId])
+}
+
+/// 반기 예산함 (이월/소멸의 기준 단위)
+model BudgetPeriod {
+  id        String   @id @default(cuid())
+  clubId    String
+  year      Int
+  half      String // FIRST_HALF | SECOND_HALF
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  club         Club                @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  grants       BudgetGrant[]
+  transactions BudgetTransaction[]
+
+  @@unique([clubId, year, half])
+  @@index([clubId])
+}
+
+/// 월별 지원금 (활동 회원 수 × 50,000원)
+model BudgetGrant {
+  id          String   @id @default(cuid())
+  clubId      String
+  periodId    String
+  snapshotId  String?  @unique
+  year        Int
+  month       Int // 1~12
+  memberCount Int
+  amount      Int // KRW
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  club     Club            @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  period   BudgetPeriod    @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  snapshot MemberSnapshot? @relation(fields: [snapshotId], references: [id])
+
+  @@unique([clubId, year, month])
+  @@index([clubId])
+  @@index([periodId])
+}
+
+// ───────────────────────── 법인카드 / 사용 내역 / 영수증 ─────────────────────────
+
+model CorporateCard {
+  id         String   @id @default(cuid())
+  clubId     String
+  label      String // 기명 표시 (예: "회장 카드")
+  holderName String // 카드 소유자(회장/총무) 이름
+  last4      String? // 카드번호 끝 4자리(표시용). 전체 번호는 저장하지 않음
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  club         Club                @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  transactions BudgetTransaction[]
+
+  @@index([clubId])
+}
+
+model BudgetTransaction {
+  id               String   @id @default(cuid())
+  clubId           String
+  cardId           String
+  periodId         String?
+  activityId       String?
+  enteredById      String? // 입력한 사용자 ID (provenance)
+  transactionDate  DateTime
+  amount           Int // KRW
+  merchantName     String
+  category         String?
+  approvalNoMasked String? // 승인번호는 마스킹 형태로만 저장
+  memo             String?
+  isPublic         Boolean  @default(true)
+  includedInReport Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  club     Club                 @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  card     CorporateCard        @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  period   BudgetPeriod?        @relation(fields: [periodId], references: [id])
+  activity Activity?            @relation(fields: [activityId], references: [id])
+  receipts TransactionReceipt[]
+
+  @@index([clubId])
+  @@index([cardId])
+  @@index([activityId])
+  @@index([transactionDate])
+}
+
+model TransactionReceipt {
+  id            String   @id @default(cuid())
+  transactionId String
+  fileUrl       String
+  uploadedById  String?
+  createdAt     DateTime @default(now())
+
+  transaction BudgetTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@index([transactionId])
+}
+
+// ───────────────────────── 모임 / 출결 ─────────────────────────
+
+model Meeting {
+  id          String   @id @default(cuid())
+  clubId      String
+  title       String
+  description String?
+  location    String?
+  startsAt    DateTime
+  endsAt      DateTime?
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  club        Club         @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  attendances Attendance[]
+  activity    Activity?
+
+  @@index([clubId])
+}
+
+model Attendance {
+  id           String    @id @default(cuid())
+  meetingId    String
+  membershipId String
+  response     String? // GOING | MAYBE | NOT_GOING
+  checkedInAt  DateTime?
+  method       String? // QR | MANUAL
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  meeting    Meeting    @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@unique([meetingId, membershipId])
+  @@index([meetingId])
+}
+
+// ───────────────────────── 활동 이야기 / 사진 ─────────────────────────
+
+model Activity {
+  id           String   @id @default(cuid())
+  clubId       String
+  meetingId    String?  @unique
+  title        String
+  activityDate DateTime
+  location     String?
+  content      String?
+  createdById  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  club         Club                @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  meeting      Meeting?            @relation(fields: [meetingId], references: [id])
+  photos       ActivityPhoto[]
+  transactions BudgetTransaction[]
+
+  @@index([clubId])
+}
+
+model ActivityPhoto {
+  id           String   @id @default(cuid())
+  activityId   String
+  uploadedById String?
+  fileUrl      String
+  status       String   @default("UPLOADED") // UPLOADED | VISIBLE | SELECTED_FOR_REPORT | EXCLUDED | DELETE_REQUESTED
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([activityId])
+}
+
+// ───────────────────────── 보고서 / Slack / 감사 로그 ─────────────────────────
+
+model Report {
+  id            String   @id @default(cuid())
+  clubId        String
+  type          String // MONTHLY_BUDGET | ACTIVITY_STORY
+  title         String
+  periodLabel   String?
+  year          Int?
+  month         Int?
+  half          String?
+  format        String? // XLSX | CSV | PDF | HTML
+  fileUrl       String?
+  generatedById String?
+  createdAt     DateTime @default(now())
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@index([clubId])
+}
+
+model SlackIntegration {
+  id            String    @id @default(cuid())
+  clubId        String    @unique
+  configured    Boolean   @default(false) // webhook URL 은 환경변수에서 읽음(DB 저장 금지)
+  channelLabel  String?
+  lastSuccessAt DateTime?
+  lastFailureAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  clubId      String?
+  actorUserId String?
+  action      String // 예: TRANSACTION_CREATE, GRANT_RECALC, ROLE_CHANGE ...
+  entityType  String
+  entityId    String?
+  summary     String?
+  metadata    String? // JSON 문자열 (SQLite 는 Json 타입 미지원)
+  createdAt   DateTime @default(now())
+
+  club Club? @relation(fields: [clubId], references: [id], onDelete: SetNull)
+
+  @@index([clubId])
+  @@index([action])
 }
