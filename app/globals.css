@@ -25,3 +25,12 @@ body {
   outline: 2px solid #6366f1;
   outline-offset: 0;
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+}

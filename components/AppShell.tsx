@@ -36,6 +36,9 @@ export function AppShell({ role, clubName, children }: Props) {
             <Link href="/activities" className="hover:text-indigo-600">
               활동
             </Link>
+            <Link href="/reports" className="hover:text-indigo-600">
+              보고서
+            </Link>
             {manage && (
               <>
                 <Link
