@@ -3,13 +3,15 @@
 동호회의 **예산·법인카드 사용·QR 출결·활동 보고서**를 한 흐름으로 관리하는 웹앱입니다.
 
 - 기술: Next.js (App Router) · TypeScript · Tailwind CSS · Prisma
-- 개발 DB: SQLite (파일 하나) → 운영 DB: PostgreSQL 로 전환 가능
+- DB: PostgreSQL (개발/운영 공통). 배포는 `docs/DEPLOYMENT.md` 참고.
 
 ---
 
 ## 비개발자용 로컬 실행법
 
 > 컴퓨터에 **Node.js(버전 20 이상)** 가 설치되어 있어야 합니다.
+> DB 는 PostgreSQL 을 사용합니다 — 가장 쉬운 방법은 Supabase 무료 DB 의
+> 연결 문자열을 그대로 쓰는 것입니다(배포와 동일).
 
 ### 1. 의존성 설치 (처음 한 번)
 
@@ -19,15 +21,23 @@ npm install
 
 ### 2. 환경변수 파일 만들기 (처음 한 번)
 
-예시 파일을 복사해서 `.env.local` 을 만듭니다. (이미 있으면 건너뛰세요)
-
 ```bash
 cp .env.example .env.local
 ```
 
-> `.env.local` 안의 값은 비밀입니다. GitHub 에 올라가지 않도록 설정되어 있습니다.
+`.env.local` 의 `DATABASE_URL` 에 PostgreSQL 연결 문자열을 넣습니다.
+(`AUTH_SECRET` 도 아무 긴 문자열로 채우세요.)
 
-### 3. 개발 서버 실행
+> `.env.local` 안의 값은 비밀입니다. GitHub 에 올라가지 않습니다.
+
+### 3. 데이터베이스 준비 (처음 한 번)
+
+```bash
+npm run db:push    # 스키마를 DB 에 생성
+npm run db:seed    # (선택) 예시 데이터 넣기
+```
+
+### 4. 개발 서버 실행
 
 ```bash
 npm run dev
@@ -54,6 +64,8 @@ npm run dev
 | `npm run lint` | 코드 스타일 검사 |
 | `npm run typecheck` | 타입(자료형) 오류 검사 |
 | `npm run test` | 자동 테스트 실행 |
+| `npm run db:push` | 스키마를 DB 에 반영 |
+| `npm run db:seed` | 예시 데이터 넣기 |
 | `npm run prisma:studio` | DB 내용을 표로 보기 |
 
 ---

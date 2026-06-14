@@ -1,17 +1,17 @@
 // 모임 — Prisma schema
 //
-// 개발: SQLite(파일 DB). 운영: provider 를 "postgresql" 로 바꾸고
-// DATABASE_URL 만 교체하면 됩니다. (SQLite 전용 기능은 쓰지 않습니다.)
+// DB: PostgreSQL (개발/운영 공통). DATABASE_URL 만 교체하면 됩니다.
+// 로컬 개발도 PostgreSQL 을 사용합니다(운영과 동일 환경).
 //
-// 참고: SQLite 는 enum 을 지원하지 않으므로 역할/상태 등은 String 으로
-//       저장하고, 허용 값은 lib/domain.ts 의 타입/상수로 관리합니다.
+// 참고: 역할/상태 등은 이식성을 위해 String 으로 저장하고,
+//       허용 값은 lib/domain.ts 의 타입/상수로 관리합니다.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

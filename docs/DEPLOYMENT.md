@@ -27,39 +27,35 @@
 > `AUTH_SECRET` 무작위 값 만들기: 터미널에서
 > `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
 
-## 2. SQLite → PostgreSQL 전환
+## 2. 데이터베이스 스키마 생성 (Supabase)
 
-1. `prisma/schema.prisma` 의 `datasource db` 에서
-   `provider = "sqlite"` 를 `provider = "postgresql"` 로 변경.
-2. `DATABASE_URL` 을 PostgreSQL 주소로 설정.
-3. 마이그레이션 적용:
+이 프로젝트는 PostgreSQL 을 사용하며, 스키마는 `prisma db push` 로 적용합니다
+(마이그레이션 파일 관리가 필요 없어 비개발자에게 간단).
+
+1. Supabase 에서 프로젝트를 만들고 **연결 문자열(Connection string)** 을 복사.
+   (Project Settings → Database → Connection string → URI)
+2. 로컬에서 `.env.local` 의 `DATABASE_URL` 을 그 값으로 설정.
+3. 스키마 생성:
    ```bash
-   npx prisma migrate deploy
+   npx prisma db push
    ```
-   (SQLite 전용 기능을 쓰지 않으므로 스키마는 그대로 호환됩니다.)
+4. (선택) 데모 데이터: `npm run db:seed`
 
-> 주의: 개발용 SQLite 의 `prisma/migrations` 는 SQLite 기준으로 생성된
-> 파일입니다. PostgreSQL 로 처음 전환할 때 마이그레이션 충돌이 나면,
-> 새 DB 에 한해 `prisma migrate reset` 후 `migrate dev` 로 재생성할 수
-> 있습니다. (운영 데이터가 있는 DB 에서는 절대 reset 하지 마세요.)
+> 운영 첫 동호회는 시드 대신 직접 만들고 초대코드를 발급하는 것을 권장합니다.
 
-## 3. 시드(선택, 데모용)
+## 3. Vercel 배포
 
-```bash
-npm run db:seed
-```
-
-운영 첫 동호회는 시드 대신 직접 만들고, 초대코드를 발급해 배포하는 것을
-권장합니다.
-
-## 4. Vercel 배포
-
-1. Vercel 에서 GitHub 저장소를 import.
-2. Environment Variables 에 위 1번 값들을 입력 (`FEATURE_DEV_LOGIN=false`).
-3. Build Command 는 기본값(`next build`), Install 시 `prisma generate` 가
+1. Vercel 에서 GitHub 저장소를 import (브랜치 선택).
+2. Environment Variables 에 1번 표의 값들을 입력:
+   - `DATABASE_URL` (Supabase 연결 문자열)
+   - `AUTH_SECRET` (무작위 긴 문자열)
+   - `NEXT_PUBLIC_APP_URL` (배포 도메인)
+   - `FEATURE_DEV_LOGIN=false`
+   - (선택) `SLACK_WEBHOOK_URL`
+3. Build Command 는 기본값(`next build`). 설치 시 `prisma generate` 가
    `postinstall` 로 자동 실행됩니다.
-4. 첫 배포 후 한 번 `prisma migrate deploy` 를 실행 (Vercel 의 배포 훅 또는
-   로컬에서 운영 `DATABASE_URL` 로 실행).
+4. 스키마는 2번에서 `prisma db push` 로 이미 Supabase 에 생성되어 있으므로
+   배포만 하면 됩니다. (스키마를 바꾸면 다시 `prisma db push` 실행)
 
 ## 5. 업로드 파일(사진) 주의
 
