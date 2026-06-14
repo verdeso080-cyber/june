@@ -7,10 +7,15 @@ import { ROLE_LABELS } from "@/lib/auth/roles";
 
 export const dynamic = "force-dynamic";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const ctx = await getCurrentContext();
   if (ctx.membership) redirect("/dashboard");
 
+  const { error } = await searchParams;
   const dev = devLoginEnabled();
 
   return (
@@ -19,6 +24,12 @@ export default async function LoginPage() {
       <p className="mt-1 text-gray-500">
         동호회 초대코드와 닉네임으로 입장합니다.
       </p>
+
+      {error && (
+        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
       <form
         action={joinWithInvite}
