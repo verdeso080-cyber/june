@@ -7,7 +7,8 @@
 //       허용 값은 lib/domain.ts 의 타입/상수로 관리합니다.
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
