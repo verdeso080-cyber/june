@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentContext } from "@/lib/auth/session";
 import { canManageBudget } from "@/lib/auth/roles";
 import { recordAudit } from "@/lib/audit";
+import { notify } from "@/lib/slack/client";
 import { getMonthlyBudgetReport } from "@/lib/reports/budget";
 import { buildBudgetCsv, budgetReportFilename } from "@/lib/reports/csv";
 import { formatDate } from "@/lib/format";
@@ -46,6 +47,12 @@ export async function GET(req: NextRequest) {
     action: "REPORT_GENERATE",
     entityType: "Report",
     summary: `월간 예산 보고서 (${format.toUpperCase()}) ${report.year}-${report.month}`,
+  });
+  await notify(club.id, {
+    type: "REPORT_GENERATED",
+    clubName: club.name,
+    reportTitle: `${report.year}년 ${report.month}월 예산 보고서`,
+    format: format.toUpperCase(),
   });
 
   const disposition = `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`;

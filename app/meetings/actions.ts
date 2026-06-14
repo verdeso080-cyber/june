@@ -6,6 +6,8 @@ import { prisma } from "@/lib/db";
 import { getCurrentContext } from "@/lib/auth/session";
 import { assertCanOperate } from "@/lib/auth/roles";
 import { recordAudit } from "@/lib/audit";
+import { notify } from "@/lib/slack/client";
+import { formatDate } from "@/lib/format";
 import {
   defaultExpiry,
   generateCheckinToken,
@@ -48,6 +50,14 @@ export async function createMeeting(formData: FormData) {
     entityType: "Meeting",
     entityId: meeting.id,
     summary: `모임 생성: ${title}`,
+  });
+
+  await notify(club.id, {
+    type: "MEETING_CREATED",
+    clubName: club.name,
+    title,
+    date: formatDate(startsAt),
+    location,
   });
 
   revalidatePath("/meetings");

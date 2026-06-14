@@ -27,7 +27,8 @@ export default function Home() {
           <li>✅ 3단계: 예산 대시보드 / 카드 사용 내역</li>
           <li>✅ 4단계: 모임 / QR 출결 / 활동 이야기</li>
           <li>✅ 5단계: 보고서(Excel · CSV · PDF 인쇄용)</li>
-          <li>⏳ 6단계: Slack 알림</li>
+          <li>✅ 6단계: Slack 알림</li>
+          <li>⏳ 7단계: 인증 · 초대코드 · 권한 강화</li>
         </ul>
       </section>
     </main>

@@ -50,6 +50,9 @@ export function AppShell({ role, clubName, children }: Props) {
                 <Link href="/budget/import" className="hover:text-indigo-600">
                   CSV 업로드
                 </Link>
+                <Link href="/settings/slack" className="hover:text-indigo-600">
+                  설정
+                </Link>
               </>
             )}
           </nav>
