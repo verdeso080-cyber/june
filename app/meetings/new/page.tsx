@@ -1,12 +1,12 @@
 import { AppShell } from "@/components/AppShell";
-import { getCurrentContext } from "@/lib/auth/session";
+import { requireContext } from "@/lib/auth/session";
 import { canOperate } from "@/lib/auth/roles";
 import { createMeeting } from "@/app/meetings/actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewMeetingPage() {
-  const { club, role } = await getCurrentContext();
+  const { club, role } = await requireContext();
   if (!club) {
     return (
       <AppShell role={role}>

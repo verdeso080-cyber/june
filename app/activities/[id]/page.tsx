@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
-import { getCurrentContext } from "@/lib/auth/session";
+import { requireContext } from "@/lib/auth/session";
 import { getActivity, getLinkableTransactions } from "@/lib/activity/queries";
 import { canOperate } from "@/lib/auth/roles";
 import {
@@ -27,7 +27,7 @@ export default async function ActivityDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { club, role } = await getCurrentContext();
+  const { club, role } = await requireContext();
   const activity = await getActivity(id);
 
   if (!club || !activity || activity.clubId !== club.id) {

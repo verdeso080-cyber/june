@@ -1,12 +1,12 @@
 import { AppShell } from "@/components/AppShell";
 import { ImportClient } from "@/components/ImportClient";
-import { getCurrentContext } from "@/lib/auth/session";
+import { requireContext } from "@/lib/auth/session";
 import { canManageBudget } from "@/lib/auth/roles";
 
 export const dynamic = "force-dynamic";
 
 export default async function ImportPage() {
-  const { club, role } = await getCurrentContext();
+  const { club, role } = await requireContext();
   if (!club) {
     return (
       <AppShell role={role}>

@@ -1,5 +1,5 @@
 import { AppShell } from "@/components/AppShell";
-import { getCurrentContext } from "@/lib/auth/session";
+import { requireContext } from "@/lib/auth/session";
 import { canManageBudget, canOperate } from "@/lib/auth/roles";
 import { listActivities } from "@/lib/activity/queries";
 import { createActivityReport } from "@/app/reports/actions";
@@ -8,7 +8,7 @@ import { formatDate } from "@/lib/format";
 export const dynamic = "force-dynamic";
 
 export default async function ReportsPage() {
-  const { club, role } = await getCurrentContext();
+  const { club, role } = await requireContext();
   if (!club) {
     return (
       <AppShell role={role}>

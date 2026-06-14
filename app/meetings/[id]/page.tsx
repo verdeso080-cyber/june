@@ -2,7 +2,7 @@ import Link from "next/link";
 import QRCode from "qrcode";
 import { AppShell } from "@/components/AppShell";
 import { prisma } from "@/lib/db";
-import { getCurrentContext } from "@/lib/auth/session";
+import { requireContext } from "@/lib/auth/session";
 import { getMeeting } from "@/lib/attendance/queries";
 import { canOperate, ROLE_LABELS } from "@/lib/auth/roles";
 import { isCheckinValid } from "@/lib/attendance/session";
@@ -29,7 +29,7 @@ export default async function MeetingDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { club, role } = await getCurrentContext();
+  const { club, role } = await requireContext();
   const meeting = await getMeeting(id);
 
   if (!club || !meeting || meeting.clubId !== club.id) {

@@ -45,6 +45,8 @@ model Club {
   reports      Report[]
   auditLogs    AuditLog[]
   slack        SlackIntegration?
+  announcements Announcement[]
+  faqs         Faq[]
 }
 
 model InviteCode {
@@ -343,4 +345,35 @@ model AuditLog {
 
   @@index([clubId])
   @@index([action])
+}
+
+// ───────────────────────── 공지 / FAQ (후순위) ─────────────────────────
+
+model Announcement {
+  id          String   @id @default(cuid())
+  clubId      String
+  title       String
+  body        String
+  pinned      Boolean  @default(false)
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@index([clubId])
+}
+
+model Faq {
+  id        String   @id @default(cuid())
+  clubId    String
+  question  String
+  answer    String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@index([clubId])
 }

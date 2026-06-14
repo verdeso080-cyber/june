@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { setDevRole } from "@/app/dev/actions";
+import { logout } from "@/app/login/actions";
 import { canManageBudget, ROLE_LABELS } from "@/lib/auth/roles";
+import { devLoginEnabled } from "@/lib/auth/session";
 import { ROLES } from "@/lib/domain";
 import type { Role } from "@/lib/domain";
 
@@ -12,6 +14,7 @@ interface Props {
 
 export function AppShell({ role, clubName, children }: Props) {
   const manage = canManageBudget(role);
+  const dev = devLoginEnabled();
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -39,6 +42,12 @@ export function AppShell({ role, clubName, children }: Props) {
             <Link href="/reports" className="hover:text-indigo-600">
               보고서
             </Link>
+            <Link href="/announcements" className="hover:text-indigo-600">
+              공지
+            </Link>
+            <Link href="/faq" className="hover:text-indigo-600">
+              FAQ
+            </Link>
             {manage && (
               <>
                 <Link
@@ -57,30 +66,40 @@ export function AppShell({ role, clubName, children }: Props) {
             )}
           </nav>
 
-          {/* 개발용 역할 전환기 */}
-          <form
-            action={setDevRole}
-            className="ml-auto flex items-center gap-2 text-xs text-gray-500"
-          >
-            <span>개발용 역할:</span>
-            <select
-              name="role"
-              defaultValue={role}
-              className="rounded border border-gray-300 px-2 py-1"
-            >
-              {ROLES.map((r) => (
-                <option key={r} value={r}>
-                  {ROLE_LABELS[r]}
-                </option>
-              ))}
-            </select>
-            <button
-              type="submit"
-              className="rounded bg-gray-800 px-2 py-1 text-white"
-            >
-              전환
-            </button>
-          </form>
+          <div className="ml-auto flex items-center gap-3 text-xs text-gray-500">
+            <span className="rounded bg-gray-100 px-2 py-1">
+              {ROLE_LABELS[role]}
+            </span>
+
+            {/* 개발용 역할 전환기 (production 에서는 숨김) */}
+            {dev && (
+              <form action={setDevRole} className="flex items-center gap-1">
+                <select
+                  name="role"
+                  defaultValue={role}
+                  className="rounded border border-gray-300 px-2 py-1"
+                >
+                  {ROLES.map((r) => (
+                    <option key={r} value={r}>
+                      {ROLE_LABELS[r]}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="submit"
+                  className="rounded bg-gray-800 px-2 py-1 text-white"
+                >
+                  전환
+                </button>
+              </form>
+            )}
+
+            <form action={logout}>
+              <button type="submit" className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-100">
+                로그아웃
+              </button>
+            </form>
+          </div>
         </div>
       </header>
 

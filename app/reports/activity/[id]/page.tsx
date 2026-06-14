@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PrintButton } from "@/components/PrintButton";
-import { getCurrentContext } from "@/lib/auth/session";
+import { requireContext } from "@/lib/auth/session";
 import { getActivityReport } from "@/lib/reports/activity";
 import { canOperate } from "@/lib/auth/roles";
 import { formatDate, formatKRW } from "@/lib/format";
@@ -13,7 +13,7 @@ export default async function ActivityReportPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { club, role } = await getCurrentContext();
+  const { club, role } = await requireContext();
   const data = await getActivityReport(id);
 
   if (!club || !data || data.activity.clubId !== club.id) {

@@ -1,5 +1,5 @@
 import { AppShell } from "@/components/AppShell";
-import { getCurrentContext } from "@/lib/auth/session";
+import { requireContext } from "@/lib/auth/session";
 import { getFormOptions } from "@/lib/budget/queries";
 import { canManageBudget } from "@/lib/auth/roles";
 import { createTransaction } from "@/app/budget/actions";
@@ -7,7 +7,7 @@ import { createTransaction } from "@/app/budget/actions";
 export const dynamic = "force-dynamic";
 
 export default async function NewTransactionPage() {
-  const { club, role } = await getCurrentContext();
+  const { club, role } = await requireContext();
   if (!club) {
     return (
       <AppShell role={role}>

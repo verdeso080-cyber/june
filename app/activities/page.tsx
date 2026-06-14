@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
-import { getCurrentContext } from "@/lib/auth/session";
+import { requireContext } from "@/lib/auth/session";
 import { listActivities } from "@/lib/activity/queries";
 import { canOperate } from "@/lib/auth/roles";
 import { countAttendees, sumTransactionAmounts } from "@/lib/activity/summary";
@@ -9,7 +9,7 @@ import { formatDate, formatKRW } from "@/lib/format";
 export const dynamic = "force-dynamic";
 
 export default async function ActivitiesPage() {
-  const { club, role } = await getCurrentContext();
+  const { club, role } = await requireContext();
   if (!club) {
     return (
       <AppShell role={role}>

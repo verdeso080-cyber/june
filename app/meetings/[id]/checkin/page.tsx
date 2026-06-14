@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { prisma } from "@/lib/db";
-import { getCurrentContext } from "@/lib/auth/session";
+import { requireContext } from "@/lib/auth/session";
 import { getSessionByToken } from "@/lib/attendance/queries";
 import { isCheckinValid } from "@/lib/attendance/session";
 import { checkIn } from "@/app/meetings/actions";
@@ -17,7 +17,7 @@ export default async function CheckinPage({
 }) {
   const { id } = await params;
   const { token } = await searchParams;
-  const { role, membership } = await getCurrentContext();
+  const { role, membership } = await requireContext();
 
   const session = token ? await getSessionByToken(token) : null;
   const valid =

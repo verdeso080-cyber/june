@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { TransactionTable } from "@/components/TransactionTable";
-import { getCurrentContext } from "@/lib/auth/session";
+import { requireContext } from "@/lib/auth/session";
 import { listTransactions } from "@/lib/budget/queries";
 import { canManageBudget } from "@/lib/auth/roles";
 
 export const dynamic = "force-dynamic";
 
 export default async function TransactionsPage() {
-  const { club, role } = await getCurrentContext();
+  const { club, role } = await requireContext();
   if (!club) {
     return (
       <AppShell role={role}>

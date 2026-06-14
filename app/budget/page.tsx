@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/AppShell";
 import { TransactionTable } from "@/components/TransactionTable";
-import { getCurrentContext } from "@/lib/auth/session";
+import { requireContext } from "@/lib/auth/session";
 import { getDashboardData, listTransactions } from "@/lib/budget/queries";
 import { formatKRW } from "@/lib/format";
 
@@ -12,7 +12,7 @@ const HALF_LABEL: Record<string, string> = {
 };
 
 export default async function BudgetPage() {
-  const { club, role } = await getCurrentContext();
+  const { club, role } = await requireContext();
   if (!club) {
     return (
       <AppShell role={role}>
