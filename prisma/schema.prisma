@@ -222,8 +222,23 @@ model Meeting {
   club        Club         @relation(fields: [clubId], references: [id], onDelete: Cascade)
   attendances Attendance[]
   activity    Activity?
+  checkinSessions CheckinSession[]
 
   @@index([clubId])
+}
+
+/// QR 체크인 세션 (예측 불가 토큰 + 만료)
+model CheckinSession {
+  id        String   @id @default(cuid())
+  meetingId String
+  token     String   @unique
+  expiresAt DateTime
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
 }
 
 model Attendance {

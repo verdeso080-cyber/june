@@ -29,6 +29,7 @@ next-env.d.ts
 
 # Uploads
 /uploads
+/public/uploads
 
 # Build / test output
 /coverage

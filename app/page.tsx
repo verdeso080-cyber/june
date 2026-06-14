@@ -25,7 +25,7 @@ export default function Home() {
           <li>✅ 1단계: 프로젝트 토대(Next.js · TypeScript · Tailwind · Prisma)</li>
           <li>✅ 2단계: 데이터 모델 + 예산 엔진</li>
           <li>✅ 3단계: 예산 대시보드 / 카드 사용 내역</li>
-          <li>⏳ 4단계: QR 출결 / 활동 이야기</li>
+          <li>✅ 4단계: 모임 / QR 출결 / 활동 이야기</li>
           <li>⏳ 5단계: 보고서(Excel · PDF)</li>
           <li>⏳ 6단계: Slack 알림</li>
         </ul>

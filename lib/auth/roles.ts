@@ -25,3 +25,10 @@ export function assertCanManageBudget(role: Role): void {
     throw new Error("권한이 없습니다. 예산 입력은 총무/회장/운영자만 가능합니다.");
   }
 }
+
+/** 운영 권한(회장 이상)이 없으면 오류를 던집니다. */
+export function assertCanOperate(role: Role): void {
+  if (!canOperate(role)) {
+    throw new Error("권한이 없습니다. 모임/활동 운영은 회장/운영자만 가능합니다.");
+  }
+}

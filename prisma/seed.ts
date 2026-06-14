@@ -129,10 +129,37 @@ async function main() {
     },
   });
 
-  // 활동 이야기 1개 (거래 연결용)
+  // 모임 1개 + 출석(체크인) 12명
+  const meeting = await prisma.meeting.create({
+    data: {
+      clubId: club.id,
+      title: "6월 정기 러닝 모임",
+      location: "한강공원",
+      startsAt: utc(2026, 6, 10),
+      description: "한강 5km 러닝 후 저녁 회식",
+    },
+  });
+  const memberMemberships = await prisma.membership.findMany({
+    where: { clubId: club.id, role: "MEMBER" },
+    take: 12,
+  });
+  for (const mem of memberMemberships) {
+    await prisma.attendance.create({
+      data: {
+        meetingId: meeting.id,
+        membershipId: mem.id,
+        response: "GOING",
+        checkedInAt: utc(2026, 6, 10),
+        method: "QR",
+      },
+    });
+  }
+
+  // 활동 이야기 1개 (모임 + 거래 연결용)
   const activity = await prisma.activity.create({
     data: {
       clubId: club.id,
+      meetingId: meeting.id,
       title: "6월 정기 러닝 모임",
       activityDate: utc(2026, 6, 10),
       location: "한강공원",
