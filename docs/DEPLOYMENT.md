@@ -27,21 +27,25 @@
 > `AUTH_SECRET` 무작위 값 만들기: 터미널에서
 > `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
 
-## 2. 데이터베이스 스키마 생성 (Supabase)
+## 2. 데이터베이스 스키마 생성 (Supabase SQL Editor)
 
-이 프로젝트는 PostgreSQL 을 사용하며, 스키마는 `prisma db push` 로 적용합니다
-(마이그레이션 파일 관리가 필요 없어 비개발자에게 간단).
+가장 확실한 방법은 Supabase 의 **SQL Editor** 에서 `supabase-init.sql` 을 한 번
+실행하는 것입니다. (스키마 + 데모 데이터가 한 번에 생성됩니다. Vercel 빌드
+중 `prisma db push` 가 풀러와 충돌해 멈추는 문제를 피합니다.)
 
-1. Supabase 에서 프로젝트를 만들고 **연결 문자열(Connection string)** 을 복사.
-   (Project Settings → Database → Connection string → URI)
-2. 로컬에서 `.env.local` 의 `DATABASE_URL` 을 그 값으로 설정.
-3. 스키마 생성:
-   ```bash
-   npx prisma db push
-   ```
-4. (선택) 데모 데이터: `npm run db:seed`
+1. Supabase → 좌측 **SQL Editor** → **New query**
+2. 저장소의 `supabase-init.sql` 내용을 전체 복사해 붙여넣기
+3. **Run** → 테이블 20개 + 데모 데이터 생성 완료
 
-> 운영 첫 동호회는 시드 대신 직접 만들고 초대코드를 발급하는 것을 권장합니다.
+> 데모 데이터 없이 시작하려면 `supabase-init.sql` 대신 스키마만 적용하세요:
+> 로컬에서 `DATABASE_URL` 을 Supabase 로 설정 후 `npx prisma db push`.
+> 스키마를 바꾸면 다시 `prisma db push`(로컬) 또는 SQL Editor 로 반영합니다.
+
+### 연결 문자열 (DATABASE_URL) — 중요
+Vercel 에서는 **Session pooler** 주소를 쓰세요 (호스트에 `pooler.supabase.com`
+포함, 포트 `5432`). `db.xxxx.supabase.co` (Direct) 주소는 Vercel 에서 연결이
+안 됩니다(IPv6). 비밀번호에 특수문자가 있으면 오류가 날 수 있으니 영문+숫자
+권장.
 
 ## 3. Vercel 배포
 
