@@ -12,6 +12,28 @@ dist
 dist-ssr
 *.local
 
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+
+# Env files (secrets) — .env.example 는 추적됩니다
+.env
+.env.local
+.env*.local
+
+# Prisma / SQLite dev DB
+/prisma/dev.db
+/prisma/dev.db-journal
+/prisma/migrations/dev.db
+
+# Uploads
+/uploads
+
+# Build / test output
+/coverage
+*.tsbuildinfo
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

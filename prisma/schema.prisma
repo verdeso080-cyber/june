@@ -1,0 +1,25 @@
+// 모임 — Prisma schema
+//
+// 개발 단계에서는 SQLite(파일 DB)를 사용합니다.
+// 운영 단계에서는 provider 를 "postgresql" 로 바꾸고
+// DATABASE_URL 만 교체하면 됩니다. (SQLite 전용 기능은 사용하지 않습니다.)
+//
+// ⚠️ 실제 도메인 모델(회원/예산/카드/출결/활동/보고서)은
+//    2단계에서 추가합니다. 아래는 토대 검증용 최소 모델입니다.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// 앱 메타 정보 저장용 임시 테이블 (2단계에서 실제 모델로 대체)
+model AppMeta {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}

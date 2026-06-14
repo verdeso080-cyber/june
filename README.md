@@ -1,20 +1,79 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 모임 (Moim) — 사내 동호회 운영 앱
 
-# Run and deploy your AI Studio app
+동호회의 **예산·법인카드 사용·QR 출결·활동 보고서**를 한 흐름으로 관리하는 웹앱입니다.
 
-This contains everything you need to run your app locally.
+- 기술: Next.js (App Router) · TypeScript · Tailwind CSS · Prisma
+- 개발 DB: SQLite (파일 하나) → 운영 DB: PostgreSQL 로 전환 가능
 
-View your app in AI Studio: https://ai.studio/apps/drive/1WTWhIa2Zw26xFz5i33ZnbEi39w8sGjh4
+---
 
-## Run Locally
+## 비개발자용 로컬 실행법
 
-**Prerequisites:**  Node.js
+> 컴퓨터에 **Node.js(버전 20 이상)** 가 설치되어 있어야 합니다.
 
+### 1. 의존성 설치 (처음 한 번)
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+```bash
+npm install
+```
+
+### 2. 환경변수 파일 만들기 (처음 한 번)
+
+예시 파일을 복사해서 `.env.local` 을 만듭니다. (이미 있으면 건너뛰세요)
+
+```bash
+cp .env.example .env.local
+```
+
+> `.env.local` 안의 값은 비밀입니다. GitHub 에 올라가지 않도록 설정되어 있습니다.
+
+### 3. 개발 서버 실행
+
+```bash
+npm run dev
+```
+
+브라우저에서 <http://localhost:3000> 을 엽니다.
+
+---
+
+## 자주 쓰는 명령어
+
+| 명령어 | 설명 |
+| --- | --- |
+| `npm run dev` | 개발 서버 실행 |
+| `npm run build` | 배포용 빌드(오류 없는지 검사) |
+| `npm run lint` | 코드 스타일 검사 |
+| `npm run typecheck` | 타입(자료형) 오류 검사 |
+| `npm run test` | 자동 테스트 실행 |
+| `npm run prisma:studio` | DB 내용을 표로 보기 |
+
+---
+
+## 폴더 구조 (요약)
+
+```
+app/            화면(페이지)
+lib/            업무 로직(예산 계산 등) · 공용 함수
+prisma/         데이터베이스 설계(schema.prisma)
+tests/          자동 테스트
+docs/           제품/DB/API/테스트/로드맵 문서
+legacy/         이전에 있던 무관한 앱 보관(수정하지 않음)
+```
+
+---
+
+## 문서
+
+- [docs/PRD.md](docs/PRD.md) — 제품 요구사항
+- [docs/DATABASE.md](docs/DATABASE.md) — 데이터 구조
+- [docs/API.md](docs/API.md) — API/서버 동작
+- [docs/TESTING.md](docs/TESTING.md) — 테스트 방법
+- [docs/ROADMAP.md](docs/ROADMAP.md) — 구현 단계
+
+---
+
+## 안전 수칙
+
+- `.env.local`, Slack Webhook URL, DB 비밀번호는 **절대 공유/커밋 금지**.
+- 파일 삭제, DB 초기화, 강제 push 같은 위험한 작업은 실행 전 반드시 확인합니다.
