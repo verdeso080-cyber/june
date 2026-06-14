@@ -52,10 +52,12 @@
    - `NEXT_PUBLIC_APP_URL` (배포 도메인)
    - `FEATURE_DEV_LOGIN=false`
    - (선택) `SLACK_WEBHOOK_URL`
-3. Build Command 는 기본값(`next build`). 설치 시 `prisma generate` 가
-   `postinstall` 로 자동 실행됩니다.
-4. 스키마는 2번에서 `prisma db push` 로 이미 Supabase 에 생성되어 있으므로
-   배포만 하면 됩니다. (스키마를 바꾸면 다시 `prisma db push` 실행)
+3. 배포 시 `vercel-build` 스크립트가 자동으로 `prisma db push` 를 실행해
+   Supabase 에 스키마를 생성/동기화합니다. (별도 명령 불필요)
+4. 첫 배포가 끝나면 도메인으로 접속 → `/login` 에서 초대코드로 입장.
+
+> 참고: 2번의 로컬 `prisma db push` 는 건너뛰어도 됩니다. Vercel 배포 시
+> 자동 적용되기 때문입니다. (로컬에서 미리 테스트하고 싶을 때만 실행)
 
 ## 5. 업로드 파일(사진) 주의
 
