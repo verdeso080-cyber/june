@@ -48,10 +48,7 @@ export default async function LoginPage({
           <span className="mb-1 block text-sm font-medium">닉네임</span>
           <input name="nickname" required className="input" placeholder="예: 홍길동" />
         </label>
-        <button
-          type="submit"
-          className="w-full rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700"
-        >
+        <button type="submit" className="btn btn-primary mt-2">
           입장하기
         </button>
       </form>
