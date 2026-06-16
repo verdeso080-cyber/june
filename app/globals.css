@@ -1,29 +1,128 @@
 @import "tailwindcss";
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f2f4f6;
+  --card: #ffffff;
+  --text: #191f28;
+  --sub: #8b95a1;
+  --line: #e5e8eb;
+  --primary: #3182f6;
+  --primary-press: #2272eb;
+  --primary-soft: #e8f3ff;
+  --danger: #f04452;
+  --warn: #ff9500;
+  --good: #18b46b;
 }
 
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: ui-sans-serif, system-ui, "Apple SD Gothic Neo", "Malgun Gothic",
-    sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* ── 모바일 앱 셸 ── */
+.app-shell {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  background: var(--bg);
+  position: relative;
+}
+
+.app-body {
+  padding: 16px 20px 96px; /* 하단 탭바 공간 */
+}
+
+/* ── 카드 ── */
+.card {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* ── 버튼 ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 52px;
+  width: 100%;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background 0.15s, transform 0.05s;
+}
+.btn:active {
+  transform: scale(0.99);
+}
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--primary-press);
+}
+.btn-secondary {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.btn-ghost {
+  background: #f2f4f6;
+  color: var(--text);
+}
+
+/* ── 입력 ── */
 .input {
   width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid #d1d5db;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  padding: 14px;
+  font-size: 16px;
   background: #fff;
 }
-
 .input:focus {
-  outline: 2px solid #6366f1;
-  outline-offset: 0;
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* ── 하단 탭바 ── */
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+  z-index: 50;
+}
+.tabbar a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--sub);
+}
+.tabbar a .ico {
+  font-size: 20px;
+  line-height: 1;
+}
+.tabbar a[data-active="true"] {
+  color: var(--primary);
+  font-weight: 700;
 }
 
 @media print {
